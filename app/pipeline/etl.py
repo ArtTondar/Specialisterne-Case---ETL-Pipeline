@@ -6,10 +6,31 @@ import json
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
+import threading
+
 
 class ETLProcess:
     def __init__(self, docker: bool = False):
         self.crud = CRUD(docker)
+
+
+    def docker_etl_background(self, interval_minutes: int = 10):
+        interval_seconds = interval_minutes * 60
+
+        print(f"ETL running every {interval_minutes} minutes.")
+
+        while True:
+            try:
+                print("Starting ETL run.")
+                self.update_database()
+            except Exception as e:
+                print("ETL error:", e)
+
+            time.sleep(interval_seconds)
+
+
+
+
 
     def update_database(self):
         """This unnamed functions job will be to handle both ETLs"""
@@ -20,9 +41,9 @@ class ETLProcess:
 
         # The rest handles the dmi etl
         stations_file = "station_ids.json"
+        base_path = Path(__file__).resolve().parent
+        file_path = (base_path / ".." / "load" / "schemas" / stations_file).resolve()
         try:
-            base_path = Path(__file__).resolve().parent
-            file_path = (base_path / ".." / "load" / "schemas" / stations_file).resolve()
             with open(file_path, "r", encoding="utf-8") as f:
                 stations = json.load(f)
         except FileNotFoundError:
@@ -190,3 +211,46 @@ class ETLProcess:
             json.dump(times_dict, f, indent=4)
             print("etl_times_json exported")
 
+
+    def user_controlled_update(self):
+        print("""Initializing ETL process. You have two options:
+         1. The program pulls data once
+         2. The program pulls data and then auto-updates at a user-defined interval
+         """)
+        print("Which option do you want?")
+        x = input().strip()
+        while x not in {"1","2"}:
+            print("You must input 1 or 2")
+            x = input().strip()
+        if x == "1":
+            self.update_database()
+        if x == "2":
+            default_interval = 10
+            try:
+                y = int(input("Define interval (1-60), default 10: ").strip())
+                y = y if 1 <= y <= 60 else default_interval
+            except ValueError:
+                y = default_interval
+            self.start_etl_background(interval_minutes=y)
+            # Keep the main thread alive
+            print("ETL running in background. Press Ctrl+C to stop.")
+            try:
+                while True:
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                print("Stopping ETL process...")
+
+    def run_etl_periodically(self,interval_seconds: int = 600):
+        while True:
+            try:
+                print("Starting ETL run.")
+                self.update_database()
+            except Exception as e:
+                print("ETL error:", e)
+            time.sleep(interval_seconds)
+
+    def start_etl_background(self,interval_minutes: int = 10):
+        interval_seconds = interval_minutes * 60
+        thread = threading.Thread(target=self.run_etl_periodically, args=(interval_seconds,), daemon=True)
+        thread.start()
+        print(f"ETL daemon started, running every {interval_minutes} minutes.")

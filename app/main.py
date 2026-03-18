@@ -1,22 +1,30 @@
 from app.pipeline.etl import ETLProcess
 from app.load.db.initialize import DatabaseInitializer
 from app.load.db.CRUD import CRUD
-from app.config import spec_token, local_database_schema
-
+import time
+import os
 
 def main():
-    print("hej")
-    docker = False
-    #initializer = DatabaseInitializer(docker=docker)
-    #initializer.create_db()
-    #initializer.initialize_db()
+    docker = True
+    initializer = DatabaseInitializer(docker=docker)
+    initializer.create_db()
+    initializer.initialize_db()
 
     #crud = CRUD()
-    #crud.reset_everything(True)
+    #crud.reset_everything()
 
     etl_process = ETLProcess(docker=docker)
-    etl_process.update_database()
 
+    if docker:
+        mode = os.getenv("ETL_MODE", "once")
+        interval = int(os.getenv("ETL_INTERVAL", 10))
+
+        if mode == "once":
+            etl_process.update_database()
+        elif mode == "interval":
+            etl_process.docker_etl_background(interval_minutes=interval)
+    else:
+        etl_process.user_controlled_update()
 
 
 if __name__ == "__main__":

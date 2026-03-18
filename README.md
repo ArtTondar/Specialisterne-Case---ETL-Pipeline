@@ -24,7 +24,7 @@ The program's main functionalities are:
 
 As is, the program pulls data from 3 measuring stations at DMI: Jæbersborg, Ødum and Årslev.
 
-The program can run in docker, or it can create and write to a local PostgreSQL database.
+The program can run in docker, or it can create and write to a local PostgreSQL database. In both cases, it can either pull data once or at set time intervals while running. 
 By design, the program is OS-agnostic but has only been tested on Windows.
 
 During the extraction process, the program will create/write to a JSON file ("etl_times.json") which holds the latest timestamps of each data source.
@@ -103,6 +103,8 @@ SPEC_TOKEN=your_api_token_here        # Token from Specialisterne API
 DB_USER=your_docker_db_user           # Docker DB username
 DB_PASSWORD=your_docker_db_password   # Docker DB password
 DB_NAME=your_docker_db_name           # Docker DB name
+ETL_MODE=interval                     # Pull mode ('interval' or 'once')
+ETL_INTERVAL=10                       # Minutes between intervals
 LOCAL_USER=your_local_db_user         # Local PostgreSQL username
 LOCAL_PASSWORD=your_local_db_password # Local PostgreSQL password
 LOCAL_DB=your_local_db_name           # Local PostgreSQL database name
@@ -124,6 +126,7 @@ The rest of the setup depends on whether you are running in Docker or with a loc
 If running in Docker:
 1. Download compose.ymal and Dockerfile. Place them next to main.py.
 2. Now go to .env and specify a Docker username, password and database name of your choice. See environment variables below.
+3. If you want the program to pull data only once, change ETL_mode to 'once' in .env.
 
 If running outside docker with a local database: 
 1. Edit the variable 'docker' in main.py to 'False'. 
@@ -164,7 +167,8 @@ docker compose down
 
 If running outside docker with a local database: 
 1. Run main.py 
-2. Use your favorite method to query and view the data in the database (such as pgadmin4 or terminal).
+2. Answer the inputs
+3. Use your favorite method to query and view the data in the database (such as pgadmin4 or terminal).
 
 
 ## Help
@@ -194,7 +198,7 @@ docker compose down -v
 This will delete all persistent volumes.
 
 The program also includes functionality for nuking tables or the database.
-If you wish to reset the database, simply comment out line 14 and 15 in main.py or write
+If you wish to reset the database, simply un-comment the following lines in main.py
 ```
 crud = CRUD()
 crud.reset_everything()
