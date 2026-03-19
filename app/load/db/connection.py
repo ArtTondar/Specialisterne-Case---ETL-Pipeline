@@ -93,3 +93,9 @@ class Connector:
         finally:
             if close:
                 self.close()
+
+    def execute_sql_file(self,filepath,* , commit: bool = False, close: bool = True):
+        """This method executes a SQL query fed from a SQL file"""
+        with open(filepath, 'r') as f:
+            sql_query = f.read()
+        self.execute(sql_query, close=close, commit=commit)

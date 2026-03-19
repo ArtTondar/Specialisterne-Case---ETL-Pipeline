@@ -7,8 +7,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-#Token for connecting to the Specialisterne API
+#Token for connecting to the old Specialisterne API
 spec_token = os.getenv("SPEC_TOKEN")
+
+#Token for connecting to the new Specialisterne API
+new_spec_token = os.getenv("NEW_SPEC_TOKEN")
 
 #Variable to change whether you are running in Docker or not
 docker = True

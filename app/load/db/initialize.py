@@ -6,6 +6,7 @@ from psycopg2 import sql
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import os
+from pathlib import Path
 
 class DatabaseInitializer:
     """This class handles the initial set up of the database.
@@ -49,11 +50,21 @@ class DatabaseInitializer:
 
         self.db.execute(query, close=close, commit=True)
 
+    def set_up_view_tables(self,close: bool=True):
+        base_path = Path(__file__).resolve().parent
+        sql_folder = (base_path / ".." / "sql" / "tables").resolve()
+        for filename in os.listdir(sql_folder):
+            if filename.endswith(".sql"):
+                filepath = os.path.join(sql_folder, filename)
+                self.db.execute_sql_file(filepath,close=close,commit=True)
+
+
     def initialize_db(self):
         self.db.connect()
         for table in TABLES:
             print(f"Setting up table: {table}")
             self.set_up_table(table,TABLES[table],False)
+        self.set_up_view_tables(False)
 
         self.db.close()
 

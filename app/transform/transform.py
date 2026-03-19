@@ -69,3 +69,38 @@ class SpecDataTransformer:
                 ds_dict["pulled_at"] = pull_time
                 ds_db_list.append(ds_dict)
         return db_dict
+
+    def scd_record_to_dict(self, record):
+        """This method transforms the data recorded from the SCD41 in the Specialisterne's API.
+        It pulls out the data we want, and changes temperature from millicelsius to Celsius.
+        The method outputs a dictionary."""
+        db_dict = {}
+        db_dict["reader_id"] = record['id']
+        read_dict = record.get("reading").get("DS18B20")
+        db_dict["temperature"] = read_dict["raw_reading"]/1000
+        db_dict["observed_at"] = record["timestamp"]
+
+        return db_dict
+    def new_spec_data_to_db_dict(self,pull_time, data):
+        """This method takes the recorded data from the specialisterne API, and transforms it to a dict of two lists.
+        The keys of the dict are the table names for the lists to be put into.
+        It returns a dict with lists of dicts (a dict per record) where the parent dict is keyed by the names of the readers (which are also the target table names)."""
+        bme_db_list = []
+        ds_db_list = []
+        scd_db_list = []
+        db_dict = {"BME280": bme_db_list, "DS18B20": ds_db_list, "SCD41": scd_db_list}
+        for record in data:
+            device = list(record.get("reading").keys())[0]
+            if device == "BME280":
+                bme_dict = self.bme_record_to_dict(record)
+                bme_dict["pulled_at"] = pull_time
+                bme_db_list.append(bme_dict)
+            if device == "DS18B20":
+                ds_dict = self.ds_record_to_dict(record)
+                ds_dict["pulled_at"] = pull_time
+                ds_db_list.append(ds_dict)
+            if device == "SCD41":
+                scd_dict = self.scd_record_to_dict(record)
+                ds_dict["pulled_at"] = pull_time
+                scd_db_list.append(scd_dict)
+        return db_dict

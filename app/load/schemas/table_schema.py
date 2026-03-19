@@ -20,4 +20,5 @@ TABLES = {"DMI": {
             "temperature": "NUMERIC(20, 13)",
             "observed_at": "TIMESTAMP WITH TIME ZONE",
             "pulled_at": "TIMESTAMP WITH TIME ZONE"
-        }}
+        }
+}
