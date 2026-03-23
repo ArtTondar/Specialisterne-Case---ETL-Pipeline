@@ -284,7 +284,7 @@ class ETLProcess:
             # We explicitly make sure to remove those duplicates.
             # This is not necessary for the database, as the create_mult_rows method skips duplicates.
             # HOWEVER, it is necessary to ensure the process stops.
-            # Indeed, if we don't remove them, there records will always have at least two records, and the process will hang.
+            # Indeed, if we don't remove them, there records will always have at least one record per reader, and the process will hang.
             avoid_ids = [last_readings[key]["id"] for key in last_readings]
 
             db_dict = transformer.new_spec_data_to_db_dict(pull_time, records)

@@ -10,10 +10,11 @@ This program's purpose is to extract, transform and load data from external APIs
    - [Dependencies](#dependencies)
    - [Environment Variables](#environment-variables)
    - [Initial Set-up](#initial-set-up)
+   - [Adding Data Sources (DMI)](#adding-data-sources-dmi)
    - [Executing Program](#executing-program)
 4. [Help](#help)
     - [Resetting the Database](#resetting-the-database)
-6. [Authors](#authors)
+5. [Authors](#authors)
 6. [Version History](#version-history)
 
 ## Description
@@ -83,7 +84,7 @@ The datatypes of the table columns are defined in load/schemas/table_schema.py. 
 
 **SCD41 Table:**
 
- Column      | Datatype                 | content                                            | 
+|  Column     | Datatype                 | content                                            | 
 |-------------|--------------------------|----------------------------------------------------|
 | id          | integer, primary key     | the database id                                    |
 | reader_id   | UUID, foreign key        | the uuid of the reading in the dmi database        |
@@ -120,7 +121,7 @@ SPEC_TOKEN=your_api_token_here        # Token from Specialisterne API
 DB_USER=your_docker_db_user           # Docker DB username
 DB_PASSWORD=your_docker_db_password   # Docker DB password
 DB_NAME=your_docker_db_name           # Docker DB name
-ETL_MODE=interval                     # Pull mode ('interval' or 'once')
+ETL_MODE=once                         # Pull mode ('interval' or 'once')
 ETL_INTERVAL=10                       # Minutes between intervals
 LOCAL_USER=your_local_db_user         # Local PostgreSQL username
 LOCAL_PASSWORD=your_local_db_password # Local PostgreSQL password
@@ -128,7 +129,6 @@ LOCAL_DB=your_local_db_name           # Local PostgreSQL database name
 ```
 
 ### Initial Set-up
-First 
 1. Download the app folder and .env.template. Place them in the same project directory.
 2. Rename .env.template to .env
 3. Get a token for the new Specialisterne API
@@ -152,9 +152,12 @@ If running in Docker:
 
 If running outside docker with a local database: 
 1. Edit the variable 'docker' in config.py to 'False'. 
-2. Go to .env and fill in your PostgreSQL username and password.By default, the user in PostgreSQL is "postgres". You should also specify a database name of your choice. See environment variables above.
+2. Go to .env and fill in your PostgreSQL username and password. By default, the user in PostgreSQL is "postgres". You should also specify a database name of your choice. See environment variables above.
 
-
+### Adding Data Sources (DMI)
+By default, the DMI data is pulled from three set DMI stations. You can edit these in /app/load/schemas/station_ids.json.
+New stations can be added by going to the DMI webpage, finding their list of stations and grabbing a stationID. 
+Then simply add this to the JSON file.
 
 ### Executing program
 
